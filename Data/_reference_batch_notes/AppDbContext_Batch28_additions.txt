@@ -1,0 +1,24 @@
+// Batch 28 AppDbContext - M56 Business Dashboard | M57 Chef Performance
+
+// DbSet
+public DbSet<ChefPerformanceSnapshot> ChefPerformanceSnapshots { get; set; }
+
+// OnModelCreating
+mb.Entity<ChefPerformanceSnapshot>().HasIndex(s => new { s.ChefId, s.Period, s.PeriodKey }).IsUnique();
+mb.Entity<ChefPerformanceSnapshot>().HasIndex(s => s.ChefId);
+
+// Services
+builder.Services.AddScoped<BusinessDashboardService>();
+builder.Services.AddScoped<ChefPerformanceService>();
+
+// Navigation
+// AdminWeb:
+// { path: '/business',     element: <AdminBusinessDashboard          /> }
+// { path: '/chef-perf',    element: <AdminChefPerformanceAnalytics   /> }
+// ChefApp:
+// <Stack.Screen name="ChefPerformance" component={ChefPerformanceScreen} />
+// Link from: ChefSettingsScreen → "My Performance"
+
+// Migration
+// dotnet ef migrations add Batch28_BusinessPerformance
+// dotnet ef database update

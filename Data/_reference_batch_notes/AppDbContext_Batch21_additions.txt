@@ -1,0 +1,37 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 21 — AppDbContext additions
+// M41: Commission Management
+// M42: Chef Settlement & Payout
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. DbSet properties ──────────────────────────────────────────
+public DbSet<CommissionRule>      CommissionRules      { get; set; }
+public DbSet<CommissionLedger>    CommissionLedgers    { get; set; }
+public DbSet<ChefBankAccount>     ChefBankAccounts     { get; set; }
+public DbSet<SettlementRequest>   SettlementRequests   { get; set; }
+
+// ── 2. OnModelCreating ────────────────────────────────────────────
+mb.Entity<CommissionLedger>().HasIndex(l => l.BookingId).IsUnique();
+mb.Entity<CommissionLedger>().HasIndex(l => l.ChefId);
+mb.Entity<CommissionLedger>().HasIndex(l => l.Status);
+mb.Entity<ChefBankAccount>().HasIndex(b => b.ChefId);
+mb.Entity<SettlementRequest>().HasIndex(r => new { r.ChefId, r.Status });
+
+// Seed default commission rule
+mb.Entity<CommissionRule>().HasData(
+    new CommissionRule { Id=1, RuleName="Default Commission", AppliesTo="All", PlatformPercent=15, ChefPercent=85, IsActive=true },
+    new CommissionRule { Id=2, RuleName="Emergency Booking",  AppliesTo="BookingType", TargetValue="Emergency", PlatformPercent=12, ChefPercent=88, IsActive=true },
+    new CommissionRule { Id=3, RuleName="Event Cooking",      AppliesTo="BookingType", TargetValue="Event",     PlatformPercent=18, ChefPercent=82, IsActive=true }
+);
+
+// ── 3. Register services ──────────────────────────────────────────
+builder.Services.AddScoped<CommissionService>();
+builder.Services.AddScoped<SettlementService>();
+
+// ── 4. Hook CommissionService into BookingService ─────────────────
+// In BookingService.cs, when booking status changes to "Completed":
+// await _commissionService.RecordCommissionAsync(booking.Id, booking.ChefId, booking.TotalAmount);
+
+// ── 5. Run migration ──────────────────────────────────────────────
+// dotnet ef migrations add Batch21_CommissionSettlement
+// dotnet ef database update

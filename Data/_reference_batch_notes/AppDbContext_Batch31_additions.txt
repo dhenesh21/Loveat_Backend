@@ -1,0 +1,37 @@
+// Batch 31 — AppDbContext additions
+// M61: Background Verification | M62: Insurance
+
+// DbSet
+public DbSet<BackgroundVerification> BackgroundVerifications { get; set; }
+public DbSet<InsurancePolicy>        InsurancePolicies       { get; set; }
+public DbSet<InsuranceClaim>         InsuranceClaims         { get; set; }
+
+// OnModelCreating
+mb.Entity<BackgroundVerification>().HasIndex(v => new { v.ChefId, v.VerificationType });
+mb.Entity<BackgroundVerification>().HasIndex(v => v.Status);
+mb.Entity<InsurancePolicy>().HasIndex(p => p.PolicyNumber).IsUnique();
+mb.Entity<InsurancePolicy>().HasIndex(p => p.UserId);
+mb.Entity<InsuranceClaim>().HasIndex(c => c.ClaimRef).IsUnique();
+mb.Entity<InsuranceClaim>().HasIndex(c => c.Status);
+
+// Services
+builder.Services.AddScoped<BackgroundVerificationService>();
+builder.Services.AddScoped<InsuranceService>();
+
+// Navigation
+// ChefApp:
+// <Stack.Screen name="ChefVerification" component={ChefVerificationScreen} />
+// Link from: ChefSettingsScreen → "Background Verification"
+
+// CustomerApp + ChefApp:
+// <Stack.Screen name="Insurance" component={InsuranceScreen} />
+// Link from: Settings → "Insurance"
+
+// AdminWeb (import from AdminVerificationInsurancePages.jsx):
+// import { AdminChefVerificationManager, AdminInsuranceManager } from './AdminVerificationInsurancePages';
+// { path: '/verification', element: <AdminChefVerificationManager /> }
+// { path: '/insurance',    element: <AdminInsuranceManager       /> }
+
+// Migration
+// dotnet ef migrations add Batch31_VerificationInsurance
+// dotnet ef database update

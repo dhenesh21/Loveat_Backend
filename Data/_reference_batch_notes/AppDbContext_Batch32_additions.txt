@@ -1,0 +1,44 @@
+// Batch 32 — AppDbContext additions
+// M63: FSSAI License Tracking | M64: Video Consultations
+
+// DbSet
+public DbSet<FSSAILicense>        FSSAILicenses        { get; set; }
+public DbSet<VideoConsultation>   VideoConsultations   { get; set; }
+
+// OnModelCreating
+mb.Entity<FSSAILicense>().HasIndex(l => l.ChefId).IsUnique();
+mb.Entity<FSSAILicense>().HasIndex(l => l.LicenseNumber).IsUnique();
+mb.Entity<FSSAILicense>().HasIndex(l => l.Status);
+mb.Entity<FSSAILicense>().HasIndex(l => l.ExpiryDate);
+mb.Entity<VideoConsultation>().HasIndex(v => v.CustomerId);
+mb.Entity<VideoConsultation>().HasIndex(v => v.ChefId);
+mb.Entity<VideoConsultation>().HasIndex(v => v.Status);
+mb.Entity<VideoConsultation>().HasIndex(v => v.ScheduledAt);
+
+// Services
+builder.Services.AddScoped<FSSAIService>();
+builder.Services.AddScoped<VideoConsultationService>();
+
+// Navigation
+// ChefApp:
+// <Stack.Screen name="ChefFSSAI" component={ChefFSSAIScreen} />
+// Link from: ChefSettingsScreen → "FSSAI License"
+
+// CustomerApp:
+// <Stack.Screen name="VideoConsult" component={VideoConsultScreen} />
+// Link from: ChefProfile → "Book Free Consultation"
+//            SearchScreen → chef card → "Video Call" button
+
+// AdminWeb (import from AdminFSSAIVideoPages.jsx):
+// import { AdminFSSAIManager, AdminVideoConsultations } from './AdminFSSAIVideoPages';
+// { path: '/fssai',         element: <AdminFSSAIManager        /> }
+// { path: '/consultations', element: <AdminVideoConsultations  /> }
+
+// Background job — add to HangfireJobService (future):
+// RecurringJob.AddOrUpdate("fssai-expiry-check",
+//   () => fssaiService.SendExpiryAlertsAsync(), Cron.Weekly);
+// Sends WhatsApp/SMS to chefs whose license expires within 60 days
+
+// Migration
+// dotnet ef migrations add Batch32_FSSAIVideo
+// dotnet ef database update

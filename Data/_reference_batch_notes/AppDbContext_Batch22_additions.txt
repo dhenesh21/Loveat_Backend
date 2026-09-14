@@ -1,0 +1,31 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 22 — AppDbContext additions
+// M43: Invoice & Tax | M44: Transaction Ledger
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. DbSet properties ──────────────────────────────────────────
+public DbSet<Invoice>            Invoices             { get; set; }
+public DbSet<TransactionRecord>  TransactionRecords   { get; set; }
+
+// ── 2. OnModelCreating ────────────────────────────────────────────
+mb.Entity<Invoice>().HasIndex(i => i.InvoiceNumber).IsUnique();
+mb.Entity<Invoice>().HasIndex(i => i.BookingId).IsUnique();
+mb.Entity<Invoice>().HasIndex(i => i.CustomerId);
+mb.Entity<TransactionRecord>().HasIndex(t => t.TransactionId).IsUnique();
+mb.Entity<TransactionRecord>().HasIndex(t => t.UserId);
+mb.Entity<TransactionRecord>().HasIndex(t => t.Type);
+mb.Entity<TransactionRecord>().HasIndex(t => t.CreatedAt);
+
+// ── 3. Register services ──────────────────────────────────────────
+builder.Services.AddScoped<InvoiceService>();
+builder.Services.AddScoped<LedgerService>();
+
+// ── 4. Hook into BookingService ───────────────────────────────────
+// After booking completes:
+// await _invoiceService.GenerateInvoiceAsync(booking.Id);
+// await _ledgerService.RecordAsync(booking.UserId, "Booking", "Credit",
+//     booking.TotalAmount, newBalance, $"Booking #{booking.Id}", booking.PaymentMethod, booking.Id);
+
+// ── 5. Migration ──────────────────────────────────────────────────
+// dotnet ef migrations add Batch22_InvoiceLedger
+// dotnet ef database update

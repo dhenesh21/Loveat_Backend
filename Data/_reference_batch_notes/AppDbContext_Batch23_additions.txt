@@ -1,0 +1,24 @@
+// Batch 23 AppDbContext additions
+// M45: Dispute Management | M46: Fraud Detection Advanced
+
+// DbSet properties
+public DbSet<Dispute>             Disputes             { get; set; }
+public DbSet<DisputeEvidence>     DisputeEvidences     { get; set; }
+public DbSet<DisputeMessage>      DisputeMessages      { get; set; }
+public DbSet<FraudDetectionLog>   FraudDetectionLogs   { get; set; }
+
+// OnModelCreating
+mb.Entity<Dispute>().HasIndex(d => d.DisputeNumber).IsUnique();
+mb.Entity<Dispute>().HasIndex(d => d.BookingId);
+mb.Entity<Dispute>().HasIndex(d => d.Status);
+mb.Entity<DisputeMessage>().HasIndex(m => m.DisputeId);
+mb.Entity<FraudDetectionLog>().HasIndex(l => l.UserId);
+mb.Entity<FraudDetectionLog>().HasIndex(l => l.Action);
+
+// Services
+builder.Services.AddScoped<DisputeService>();
+builder.Services.AddScoped<FraudDetectionService>();
+
+// Migration
+// dotnet ef migrations add Batch23_DisputeFraud
+// dotnet ef database update

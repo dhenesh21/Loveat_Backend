@@ -1,0 +1,30 @@
+// Batch 26 AppDbContext - M52 Campaign+ | M53 CRM
+
+// DbSet
+public DbSet<UserSegment> UserSegments { get; set; }
+public DbSet<CrmNote>     CrmNotes     { get; set; }
+
+// OnModelCreating
+mb.Entity<UserSegment>().HasIndex(s => s.Name).IsUnique();
+mb.Entity<CrmNote>().HasIndex(n => n.UserId);
+
+// Seed default segments
+mb.Entity<UserSegment>().HasData(
+  new UserSegment { Id=1, Name="VIP Users",      Description="10+ bookings",          UserCount=0, IsActive=true },
+  new UserSegment { Id=2, Name="Regular Users",  Description="3–9 bookings",          UserCount=0, IsActive=true },
+  new UserSegment { Id=3, Name="New Users",       Description="1–2 bookings",          UserCount=0, IsActive=true },
+  new UserSegment { Id=4, Name="Inactive Users",  Description="No booking in 60 days", UserCount=0, IsActive=true },
+  new UserSegment { Id=5, Name="Churn Risk",      Description="Active then stopped",   UserCount=0, IsActive=true }
+);
+
+// Services
+builder.Services.AddScoped<CrmService>();
+
+// Migration
+// dotnet ef migrations add Batch26_CrmCampaign
+// dotnet ef database update
+
+// Navigation (AdminWeb)
+// import { AdminCRMDashboard, AdminCampaignAnalytics } from './AdminCrmCampaignPages';
+// { path: '/crm',                element: <AdminCRMDashboard      /> }
+// { path: '/campaign-analytics', element: <AdminCampaignAnalytics /> }

@@ -1,0 +1,32 @@
+// Batch 25 AppDbContext additions - M49 Audit + M50 CMS
+
+// DbSet
+public DbSet<AuditLog>  AuditLogs  { get; set; }
+public DbSet<CmsBanner> CmsBanners { get; set; }
+public DbSet<CmsPage>   CmsPages   { get; set; }
+
+// OnModelCreating
+mb.Entity<AuditLog>().HasIndex(l => l.AdminUserId);
+mb.Entity<AuditLog>().HasIndex(l => l.Module);
+mb.Entity<AuditLog>().HasIndex(l => l.CreatedAt);
+mb.Entity<CmsPage>().HasIndex(p => p.Slug).IsUnique();
+mb.Entity<CmsBanner>().HasIndex(b => b.IsActive);
+
+// Seed CMS pages
+mb.Entity<CmsPage>().HasData(
+  new CmsPage { Id=1, Slug="terms",   Title="Terms & Conditions", Content="## Terms & Conditions\n\nLast updated: December 2024", IsActive=true, UpdatedAt=DateTime.UtcNow },
+  new CmsPage { Id=2, Slug="privacy", Title="Privacy Policy",     Content="## Privacy Policy\n\nLast updated: December 2024",   IsActive=true, UpdatedAt=DateTime.UtcNow },
+  new CmsPage { Id=3, Slug="about",   Title="About LovEat",       Content="## About LovEat\n\nIndia's premier home chef platform", IsActive=true, UpdatedAt=DateTime.UtcNow },
+  new CmsPage { Id=4, Slug="refund",  Title="Refund Policy",      Content="## Refund Policy\n\nRefunds processed in 5-7 days",  IsActive=true, UpdatedAt=DateTime.UtcNow }
+);
+
+// Services
+builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<CmsService>();
+
+// Hook AuditService into other controllers:
+// await _auditService.LogAsync(adminId, "Update", "Commission", "CommissionRule", ruleId, oldJson, newJson);
+
+// Migration
+// dotnet ef migrations add Batch25_AuditCms
+// dotnet ef database update

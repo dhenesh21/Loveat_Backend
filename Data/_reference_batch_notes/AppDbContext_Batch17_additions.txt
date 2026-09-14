@@ -1,0 +1,44 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 17 — AppDbContext additions
+// Module 33: Chef Earnings Insights
+// Module 34: Corporate Dashboard (Admin side only — no new tables)
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. Add this DbSet inside AppDbContext class ──────────────────
+
+// Module 33 – Chef Earnings Snapshots (optional — for cached aggregates)
+public DbSet<ChefEarningsSnapshot> ChefEarningsSnapshots { get; set; }
+
+
+// ── 2. Add inside OnModelCreating(ModelBuilder mb) ───────────────
+
+mb.Entity<ChefEarningsSnapshot>()
+    .HasIndex(e => new { e.ChefId, e.Period, e.PeriodKey })
+    .IsUnique();
+
+mb.Entity<ChefEarningsSnapshot>()
+    .HasIndex(e => e.ChefId);
+
+mb.Entity<ChefEarningsSnapshot>()
+    .HasIndex(e => e.CreatedAt);
+
+
+// ── 3. Register services in Program.cs ───────────────────────────
+
+builder.Services.AddScoped<ChefEarningsService>();
+
+// Note: CorporateTiffinService already registered in a previous batch.
+// No new service registration needed for Module 34.
+
+
+// ── 4. Run EF migration ───────────────────────────────────────────
+//
+//   dotnet ef migrations add Batch17_ChefEarnings
+//   dotnet ef database update
+//
+// ── Note on Module 34 ────────────────────────────────────────────
+// CorporateTiffin model, service, and controller were already built
+// in Batch ~8 (CorporateTiffinService.cs, TiffinController.cs).
+// Batch 17 only adds the Admin frontend (AdminCorporateManager.jsx).
+// No additional DB tables needed.
+// ════════════════════════════════════════════════════════════════

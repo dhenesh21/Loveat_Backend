@@ -1,0 +1,67 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 16 — AppDbContext additions
+// Module 31: Support & Help Center
+// Module 32: Push Notification Campaigns
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. Add these DbSet properties inside AppDbContext class ──────
+
+// Module 31 – Support
+public DbSet<SupportTicket>  SupportTickets  { get; set; }
+public DbSet<SupportMessage> SupportMessages { get; set; }
+public DbSet<FAQ>            FAQs            { get; set; }
+
+// Module 32 – Campaigns
+public DbSet<NotificationCampaign> NotificationCampaigns { get; set; }
+
+
+// ── 2. Add inside OnModelCreating(ModelBuilder mb) ───────────────
+
+mb.Entity<SupportTicket>()
+    .HasIndex(t => t.UserId);
+
+mb.Entity<SupportTicket>()
+    .HasIndex(t => t.Status);
+
+mb.Entity<SupportTicket>()
+    .HasIndex(t => t.TicketNumber)
+    .IsUnique();
+
+mb.Entity<SupportMessage>()
+    .HasIndex(m => m.TicketId);
+
+mb.Entity<FAQ>()
+    .HasIndex(f => new { f.Category, f.Audience });
+
+mb.Entity<NotificationCampaign>()
+    .HasIndex(c => c.Status);
+
+mb.Entity<NotificationCampaign>()
+    .HasIndex(c => c.ScheduledAt);
+
+// ── 3. Seed FAQs (add inside OnModelCreating) ────────────────────
+mb.Entity<FAQ>().HasData(
+    new FAQ { Id=1,  Question="How do I cancel a booking?",          Answer="Go to My Bookings → tap the booking → Cancel. Cancellations 2+ hours before are fully refunded.",       Category="Booking",   Audience="Customer", SortOrder=1,  IsActive=true },
+    new FAQ { Id=2,  Question="When will I get my refund?",          Answer="Refunds are processed within 5–7 business days to your original payment method.",                       Category="Payment",   Audience="Customer", SortOrder=2,  IsActive=true },
+    new FAQ { Id=3,  Question="How are chefs verified?",             Answer="All chefs go through identity verification, cooking skill assessment, and background checks.",           Category="General",   Audience="Customer", SortOrder=3,  IsActive=true },
+    new FAQ { Id=4,  Question="Can I reschedule a booking?",         Answer="Yes! Contact the chef via chat at least 3 hours before the booking to agree on a new time.",            Category="Booking",   Audience="Customer", SortOrder=4,  IsActive=true },
+    new FAQ { Id=5,  Question="What payment methods are accepted?",  Answer="We accept UPI, credit/debit cards, net banking, and LovEat wallet.",                                    Category="Payment",   Audience="All",      SortOrder=5,  IsActive=true },
+    new FAQ { Id=6,  Question="When do I receive my earnings?",      Answer="Earnings are credited to your LovEat wallet within 24 hours of booking completion.",                    Category="Payment",   Audience="Chef",     SortOrder=1,  IsActive=true },
+    new FAQ { Id=7,  Question="What if a customer cancels last minute?", Answer="If cancellation is within 2 hours of the booking, you receive a 50% cancellation fee.",            Category="Booking",   Audience="Chef",     SortOrder=2,  IsActive=true },
+    new FAQ { Id=8,  Question="How long does verification take?",    Answer="Chef verification typically takes 3–5 business days after all documents are submitted.",                 Category="Verification",Audience="Chef",   SortOrder=3,  IsActive=true },
+    new FAQ { Id=9,  Question="Can I set my own prices?",            Answer="Yes! You set your hourly rate. LovEat charges a 15% platform commission on completed bookings.",       Category="General",   Audience="Chef",     SortOrder=4,  IsActive=true }
+);
+
+
+// ── 4. Register services in Program.cs ───────────────────────────
+
+builder.Services.AddScoped<SupportService>();
+builder.Services.AddScoped<CampaignService>();
+
+
+// ── 5. Run EF migration ───────────────────────────────────────────
+//
+//   dotnet ef migrations add Batch16_SupportCampaign
+//   dotnet ef database update
+//
+// ════════════════════════════════════════════════════════════════

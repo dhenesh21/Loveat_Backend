@@ -1,0 +1,42 @@
+// Batch 33 — AppDbContext additions
+// M65: AI Dietary Matching | M66: Social Features
+
+// DbSet
+public DbSet<UserDietaryProfile>  UserDietaryProfiles  { get; set; }
+public DbSet<DietaryMatchScore>   DietaryMatchScores   { get; set; }
+public DbSet<ChefFollow>          ChefFollows          { get; set; }
+public DbSet<MealPost>            MealPosts            { get; set; }
+public DbSet<MealPostLike>        MealPostLikes        { get; set; }
+public DbSet<MealPostComment>     MealPostComments     { get; set; }
+
+// OnModelCreating
+mb.Entity<UserDietaryProfile>().HasIndex(p => p.UserId).IsUnique();
+mb.Entity<DietaryMatchScore>().HasIndex(s => new { s.UserId, s.ChefId }).IsUnique();
+mb.Entity<ChefFollow>().HasIndex(f => new { f.FollowerId, f.ChefId }).IsUnique();
+mb.Entity<MealPostLike>().HasIndex(l => new { l.PostId, l.UserId }).IsUnique();
+mb.Entity<MealPost>().HasIndex(p => p.ChefId);
+mb.Entity<MealPost>().HasIndex(p => p.CreatedAt);
+mb.Entity<MealPostComment>().HasIndex(c => c.PostId);
+
+// Services
+builder.Services.AddScoped<DietaryMatchingService>();
+builder.Services.AddScoped<SocialService>();
+
+// Navigation
+// CustomerApp:
+// <Stack.Screen name="DietaryMatch"  component={DietaryMatchScreen}  />
+// <Stack.Screen name="SocialFeed"    component={SocialFeedScreen}    />
+// Link DietaryMatch from: SearchScreen → "Find by Diet" button
+// Link SocialFeed from: HomeScreen → "Chef Community" card
+
+// ChefApp:
+// Chef can create posts from ChefPortfolioScreen → "Share to Community"
+
+// AdminWeb (import from AdminDietarySocialPages.jsx):
+// import { AdminDietaryManager, AdminSocialManager } from './AdminDietarySocialPages';
+// { path: '/dietary-matching', element: <AdminDietaryManager /> }
+// { path: '/social',           element: <AdminSocialManager  /> }
+
+// Migration
+// dotnet ef migrations add Batch33_DietarySocial
+// dotnet ef database update

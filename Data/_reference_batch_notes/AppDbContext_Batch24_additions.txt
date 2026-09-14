@@ -1,0 +1,26 @@
+// Batch 24 AppDbContext additions
+// M47: Safety Incident | M48: RBAC
+
+// DbSet properties
+public DbSet<SafetyIncident> SafetyIncidents { get; set; }
+public DbSet<AdminRole>      AdminRoles      { get; set; }
+public DbSet<AdminUser>      AdminUsers      { get; set; }
+
+// OnModelCreating
+mb.Entity<SafetyIncident>().HasIndex(i => i.IncidentNumber).IsUnique();
+mb.Entity<SafetyIncident>().HasIndex(i => i.Status);
+mb.Entity<SafetyIncident>().HasIndex(i => i.Severity);
+mb.Entity<AdminRole>().HasIndex(r => r.RoleName).IsUnique();
+mb.Entity<AdminUser>().HasIndex(u => u.UserId).IsUnique();
+
+// Seed default roles (call on startup)
+// app.Services.GetRequiredService<RBACService>().SeedDefaultRolesAsync().Wait();
+// Or call POST /api/rbac/seed once after migration
+
+// Services
+builder.Services.AddScoped<SafetyIncidentService>();
+builder.Services.AddScoped<RBACService>();
+
+// Migration
+// dotnet ef migrations add Batch24_IncidentRBAC
+// dotnet ef database update

@@ -1,0 +1,58 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 19 — AppDbContext additions
+// Module 16: Rate Customer (by Chef)
+// Module 20: Promo Code & Coupon
+// Module 24: Live Order Tracking
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. Add these DbSet properties inside AppDbContext class ──────
+
+// Module 20 – Coupons
+public DbSet<Coupon>      Coupons      { get; set; }
+public DbSet<CouponUsage> CouponUsages { get; set; }
+
+// Module 24 – Live Tracking
+public DbSet<BookingTracking> BookingTrackings { get; set; }
+
+
+// ── 2. Add inside OnModelCreating(ModelBuilder mb) ───────────────
+
+mb.Entity<Coupon>()
+    .HasIndex(c => c.Code)
+    .IsUnique();
+
+mb.Entity<Coupon>()
+    .HasIndex(c => c.IsActive);
+
+mb.Entity<CouponUsage>()
+    .HasIndex(u => new { u.CouponId, u.UserId });
+
+mb.Entity<BookingTracking>()
+    .HasIndex(t => t.BookingId)
+    .IsUnique();  // one tracking record per booking
+
+mb.Entity<BookingTracking>()
+    .HasIndex(t => t.ChefId);
+
+// ── 3. Seed demo coupons ─────────────────────────────────────────
+mb.Entity<Coupon>().HasData(
+    new Coupon { Id=1, Code="WELCOME100", Description="Welcome offer for new users",    DiscountType="Flat",    DiscountValue=100, MinOrderAmount=500,  UsageLimit=0,   ValidFrom=DateTime.UtcNow, ValidTo=DateTime.UtcNow.AddMonths(3), IsActive=true, UsageLimitPerUser=1 },
+    new Coupon { Id=2, Code="LOVEAT20",   Description="20% off on all bookings",         DiscountType="Percent", DiscountValue=20,  MinOrderAmount=300,  MaxDiscount=200, UsageLimit=500, ValidFrom=DateTime.UtcNow, ValidTo=DateTime.UtcNow.AddMonths(1), IsActive=true, UsageLimitPerUser=1 },
+    new Coupon { Id=3, Code="CHEF15",     Description="15% off — chef discovery promo",  DiscountType="Percent", DiscountValue=15,  MinOrderAmount=0,    MaxDiscount=150, UsageLimit=0,   ValidFrom=DateTime.UtcNow, ValidTo=DateTime.UtcNow.AddMonths(6), IsActive=true, UsageLimitPerUser=2 }
+);
+
+
+// ── 4. Register services in Program.cs ───────────────────────────
+
+builder.Services.AddScoped<CouponService>();
+
+// Note: TrackingController uses AppDbContext directly — no separate service needed.
+// Note: CustomerRatingController uses AppDbContext directly.
+
+
+// ── 5. Run EF migration ───────────────────────────────────────────
+//
+//   dotnet ef migrations add Batch19_CouponTracking
+//   dotnet ef database update
+//
+// ════════════════════════════════════════════════════════════════

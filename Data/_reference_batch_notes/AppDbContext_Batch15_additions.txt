@@ -1,0 +1,64 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 15 — AppDbContext additions
+// Add the following DbSet properties and OnModelCreating config
+// to your existing LovEat/API/Data/AppDbContext.cs
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. Add these DbSet properties inside AppDbContext class ──────
+
+// Module 29 – Loyalty
+public DbSet<LoyaltyPoints>      LoyaltyPoints      { get; set; }
+public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
+
+// Module 30 – Referral
+public DbSet<ReferralCode> ReferralCodes { get; set; }
+public DbSet<ReferralUse>  ReferralUses  { get; set; }
+
+
+// ── 2. Add inside OnModelCreating(ModelBuilder mb) ───────────────
+
+// LoyaltyPoints — one per user
+mb.Entity<LoyaltyPoints>()
+    .HasIndex(l => l.UserId)
+    .IsUnique();
+
+mb.Entity<LoyaltyPoints>()
+    .Property(l => l.Tier)
+    .HasDefaultValue("Bronze");
+
+// LoyaltyTransaction
+mb.Entity<LoyaltyTransaction>()
+    .HasIndex(t => t.UserId);
+
+mb.Entity<LoyaltyTransaction>()
+    .HasIndex(t => t.CreatedAt);
+
+// ReferralCode — unique code value
+mb.Entity<ReferralCode>()
+    .HasIndex(r => r.Code)
+    .IsUnique();
+
+mb.Entity<ReferralCode>()
+    .HasIndex(r => r.UserId)
+    .IsUnique();   // one code per user
+
+// ReferralUse — one use per referred user
+mb.Entity<ReferralUse>()
+    .HasIndex(u => u.ReferredUserId)
+    .IsUnique();
+
+
+// ── 3. Register services in Program.cs ───────────────────────────
+
+// Add before builder.Build():
+builder.Services.AddScoped<LoyaltyService>();
+builder.Services.AddScoped<ReferralService>();
+
+
+// ── 4. Run EF migration ──────────────────────────────────────────
+//
+//   dotnet ef migrations add Batch15_LoyaltyReferral
+//   dotnet ef database update
+//
+// That's all — no manual SQL needed.
+// ════════════════════════════════════════════════════════════════

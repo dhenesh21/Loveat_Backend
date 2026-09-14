@@ -1,0 +1,36 @@
+// Batch 30 AppDbContext - M60 Marketplace Expansion
+
+// DbSet
+public DbSet<MarketplaceService>    MarketplaceServices   { get; set; }
+public DbSet<ChefServiceOffering>   ChefServiceOfferings  { get; set; }
+public DbSet<ExpansionCity>         ExpansionCities       { get; set; }
+public DbSet<CityWaitlist>          CityWaitlists         { get; set; }
+
+// OnModelCreating
+mb.Entity<MarketplaceService>().HasIndex(s => s.ServiceName).IsUnique();
+mb.Entity<ChefServiceOffering>().HasIndex(o => new { o.ChefProfileId, o.MarketplaceServiceId }).IsUnique();
+mb.Entity<ExpansionCity>().HasIndex(c => c.CityName).IsUnique();
+mb.Entity<CityWaitlist>().HasIndex(w => new { w.UserId, w.CityName }).IsUnique();
+
+// Services
+builder.Services.AddScoped<MarketplaceService>();
+
+// Seed on first run — call POST /api/marketplace/seed once after migration
+// Or call in Program.cs:
+// using (var scope = app.Services.CreateScope())
+// {
+//     var mktSvc = scope.ServiceProvider.GetRequiredService<MarketplaceService>();
+//     await mktSvc.SeedAsync();
+// }
+
+// Migration
+// dotnet ef migrations add Batch30_Marketplace
+// dotnet ef database update
+
+// Navigation
+// CustomerApp:
+// <Stack.Screen name="Marketplace" component={MarketplaceScreen} />
+// Link from: HomeScreen → "Explore Services" banner
+
+// AdminWeb:
+// { path: '/marketplace', element: <AdminMarketplaceExpansion /> }

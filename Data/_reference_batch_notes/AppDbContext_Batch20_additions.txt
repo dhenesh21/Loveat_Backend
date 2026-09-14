@@ -1,0 +1,63 @@
+// ════════════════════════════════════════════════════════════════
+// Batch 20 — AppDbContext additions (FINAL BATCH)
+// M30: Quality Check
+// M36: Smart Safety
+// M37: Grocery Auto-List
+// M38/M39: Meal Planning
+// M40: Chef Portfolio
+// ════════════════════════════════════════════════════════════════
+
+// ── 1. Add DbSet properties inside AppDbContext class ────────────
+
+public DbSet<QualityCheck>        QualityChecks        { get; set; }
+public DbSet<SafetyAlert>         SafetyAlerts         { get; set; }
+public DbSet<GroceryList>         GroceryLists         { get; set; }
+public DbSet<MealPlan>            MealPlans            { get; set; }
+public DbSet<ChefPortfolioItem>   ChefPortfolioItems   { get; set; }
+
+
+// ── 2. Add inside OnModelCreating(ModelBuilder mb) ───────────────
+
+mb.Entity<QualityCheck>()
+    .HasIndex(q => q.BookingId)
+    .IsUnique();
+
+mb.Entity<QualityCheck>()
+    .HasIndex(q => q.CustomerId);
+
+mb.Entity<SafetyAlert>()
+    .HasIndex(a => a.UserId);
+
+mb.Entity<SafetyAlert>()
+    .HasIndex(a => a.Status);
+
+mb.Entity<GroceryList>()
+    .HasIndex(g => g.BookingId)
+    .IsUnique();
+
+mb.Entity<GroceryList>()
+    .HasIndex(g => g.ChefId);
+
+mb.Entity<MealPlan>()
+    .HasIndex(p => new { p.UserId, p.WeekStart });
+
+mb.Entity<ChefPortfolioItem>()
+    .HasIndex(p => p.ChefProfileId);
+
+mb.Entity<ChefPortfolioItem>()
+    .HasIndex(p => new { p.ChefProfileId, p.IsActive });
+
+
+// ── 3. Register services in Program.cs ───────────────────────────
+
+// No separate services needed for Batch 20 —
+// all controllers use AppDbContext directly.
+// (Simple CRUD operations don't require a dedicated service layer)
+
+
+// ── 4. Run EF migration ───────────────────────────────────────────
+//
+//   dotnet ef migrations add Batch20_Final
+//   dotnet ef database update
+//
+// ════════════════════════════════════════════════════════════════

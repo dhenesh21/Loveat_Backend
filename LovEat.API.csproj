@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>LovEat.API</RootNamespace>
+    <AssemblyName>LovEat.API</AssemblyName>
+    <UserSecretsId>loveat-api-dev-secrets</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- EF Core — SQLite for local/dev, Npgsql (PostgreSQL) for production.
+         Provider is selected at runtime by the "Database:Provider" setting
+         (see Program.cs) — no code change needed to switch, just config. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+    <!-- JWT auth -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+
+    <!-- Swagger / OpenAPI -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+
+    <!-- Production hardening: structured logging, rate limiting, health checks -->
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.408.2" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+
+    <!-- These provide the AddDbContextCheck<T>() and AddStackExchangeRedisCache() extension
+         methods used in Program.cs — StackExchange.Redis alone is just the client library,
+         and Microsoft.EntityFrameworkCore alone doesn't include the health-check integration;
+         both need their own dedicated package. -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- These are historical per-batch integration notes kept for reference only.
+         They are NOT valid standalone C# (they're code fragments meant to be pasted
+         into AppDbContext.cs / Program.cs) and must stay excluded from compilation.
+         Everything in them has already been merged into Data/AppDbContext.cs and
+         Program.cs directly, so nothing further needs to be copied from here. -->
+    <Compile Remove="Data/_reference_batch_notes/**/*.cs" />
+    <None Include="Data/_reference_batch_notes/**/*.txt" />
+  </ItemGroup>
+
+</Project>

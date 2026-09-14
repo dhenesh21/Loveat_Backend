@@ -1,0 +1,33 @@
+// Batch 27 AppDbContext - M54 Service Areas | M55 AI Analytics
+
+// DbSet
+public DbSet<ServiceCity>       ServiceCities      { get; set; }
+public DbSet<ServiceZone>       ServiceZones       { get; set; }
+public DbSet<DemandPrediction>  DemandPredictions  { get; set; }
+
+// OnModelCreating
+mb.Entity<ServiceCity>().HasIndex(c => c.CityName).IsUnique();
+mb.Entity<ServiceZone>().HasIndex(z => z.ServiceCityId);
+mb.Entity<DemandPrediction>().HasIndex(d => new { d.City, d.Date, d.Hour });
+
+// Seed active cities
+mb.Entity<ServiceCity>().HasData(
+  new ServiceCity { Id=1, CityName="Coimbatore", State="Tamil Nadu", Latitude=11.0168m, Longitude=76.9558m, RadiusKm=25, IsActive=true,  ChefCount=48, BookingCount=1240 },
+  new ServiceCity { Id=2, CityName="Chennai",    State="Tamil Nadu", Latitude=13.0827m, Longitude=80.2707m, RadiusKm=35, IsActive=true,  ChefCount=85, BookingCount=3200 },
+  new ServiceCity { Id=3, CityName="Madurai",    State="Tamil Nadu", Latitude=9.9252m,  Longitude=78.1198m, RadiusKm=20, IsActive=true,  ChefCount=22, BookingCount=480  },
+  new ServiceCity { Id=4, CityName="Trichy",     State="Tamil Nadu", Latitude=10.7905m, Longitude=78.7047m, RadiusKm=18, IsActive=true,  ChefCount=14, BookingCount=310  },
+  new ServiceCity { Id=5, CityName="Bangalore",  State="Karnataka",  Latitude=12.9716m, Longitude=77.5946m, RadiusKm=30, IsActive=false, IsLaunching=true }
+);
+
+// Services
+builder.Services.AddScoped<ServiceAreaService>();
+builder.Services.AddScoped<AIAnalyticsService>();
+
+// Migration
+// dotnet ef migrations add Batch27_ServiceAreaAI
+// dotnet ef database update
+
+// Navigation (AdminWeb)
+// import { AdminServiceAreaManager, AdminAIAnalytics } from './AdminServiceAreaAIPages';
+// { path: '/service-areas', element: <AdminServiceAreaManager /> }
+// { path: '/ai-analytics',  element: <AdminAIAnalytics      /> }

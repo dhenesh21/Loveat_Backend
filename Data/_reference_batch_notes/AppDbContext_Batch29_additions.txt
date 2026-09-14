@@ -1,0 +1,32 @@
+// Batch 29 AppDbContext - M58 Device Security | M59 Corporate Plans
+
+// DbSet
+public DbSet<UserSession>              UserSessions              { get; set; }
+public DbSet<SecurityEvent>            SecurityEvents            { get; set; }
+public DbSet<CorporatePlan>            CorporatePlans            { get; set; }
+public DbSet<CorporateSubscription>    CorporateSubscriptions    { get; set; }
+public DbSet<CorporateBillingRecord>   CorporateBillingRecords   { get; set; }
+
+// OnModelCreating
+mb.Entity<UserSession>().HasIndex(s => new { s.UserId, s.DeviceId });
+mb.Entity<UserSession>().HasIndex(s => s.IsActive);
+mb.Entity<SecurityEvent>().HasIndex(e => e.UserId);
+mb.Entity<SecurityEvent>().HasIndex(e => e.OccurredAt);
+mb.Entity<CorporateSubscription>().HasIndex(s => s.CompanyId).IsUnique();
+mb.Entity<CorporateBillingRecord>().HasIndex(b => b.SubscriptionId);
+
+// Seed corporate plans
+mb.Entity<CorporatePlan>().HasData(
+  new CorporatePlan { Id=1, PlanName="Basic",      MealsPerDay=20,  PricePerMeal=90, MonthlyPrice=46800,  SortOrder=1, Features="""["Dedicated chef","Mon-Fri only","Lunch only","Email support"]""" },
+  new CorporatePlan { Id=2, PlanName="Standard",   MealsPerDay=40,  PricePerMeal=85, MonthlyPrice=88400,  SortOrder=2, Features="""["Dedicated chef","Mon-Sat","Lunch + Snack","Phone support","Monthly report"]""" },
+  new CorporatePlan { Id=3, PlanName="Premium",    MealsPerDay=80,  PricePerMeal=80, MonthlyPrice=166400, SortOrder=3, Features="""["2 dedicated chefs","Mon-Sun","All meals","Priority support","Weekly reports","Custom menu"]""" },
+  new CorporatePlan { Id=4, PlanName="Enterprise", MealsPerDay=200, PricePerMeal=75, MonthlyPrice=390000, SortOrder=4, Features="""["Chef team","24/7 availability","All meals","Account manager","Daily reports","Custom menu","GST invoicing"]""" }
+);
+
+// Services
+builder.Services.AddScoped<DeviceSecurityService>();
+builder.Services.AddScoped<CorporatePlansService>();
+
+// Migration
+// dotnet ef migrations add Batch29_DeviceSecurityCorporate
+// dotnet ef database update
