@@ -145,6 +145,7 @@ if (rateLimitEnabled)
             new() { Endpoint = "*", Period = "1m", Limit = permitLimit },
         };
     });
+    builder.Services.AddMemoryCache();
     builder.Services.AddInMemoryRateLimiting();
     builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 }
@@ -438,7 +439,11 @@ builder.Services.AddHostedService<LovEat.API.Services.RecurringJobsBackgroundSer
 builder.Services.AddHostedService<LovEat.API.Services.BookingTimeoutMonitorService>();
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 // ═══════════════════════════════════════════════════════════════
 // Middleware pipeline
 // ═══════════════════════════════════════════════════════════════

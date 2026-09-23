@@ -1,0 +1,44 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: loveat-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${SA_PASSWORD}"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - loveat-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loveat-api-test
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=LovEatDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"
+    ports:
+      - "8081:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - loveat-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  loveat-network:
+    driver: bridge

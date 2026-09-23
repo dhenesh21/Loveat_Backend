@@ -1,3 +1,29 @@
-﻿.vs/
+﻿# Visual Studio
+.vs/
+*.user
+*.suo
+
+# .NET build output
 bin/
 obj/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local configuration
+appsettings.Development.json
+appsettings.Local.json
+
+# Logs
+*.log
+logs/
+
+# Test results
+TestResults/
+*.trx
+
+# OS files
+.DS_Store
+Thumbs.db
