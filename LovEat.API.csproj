@@ -54,8 +54,15 @@
          into AppDbContext.cs / Program.cs) and must stay excluded from compilation.
          Everything in them has already been merged into Data/AppDbContext.cs and
          Program.cs directly, so nothing further needs to be copied from here. -->
-    <Compile Remove="Data/_reference_batch_notes/**/*.cs" />
-    <None Include="Data/_reference_batch_notes/**/*.txt" />
+         
+  <!-- These are historical per-batch integration notes kept for reference only. -->
+  <Compile Remove="Data/_reference_batch_notes/**/*.cs" />
+  <None Include="Data/_reference_batch_notes/**/*.txt" />
+
+  <!-- Test files belong to the separate LovEat.API.Tests project.
+       Do not compile them as part of the main API project. -->
+  <Compile Remove="API.Tests/**/*.cs" />
+  
   </ItemGroup>
 
 </Project>
